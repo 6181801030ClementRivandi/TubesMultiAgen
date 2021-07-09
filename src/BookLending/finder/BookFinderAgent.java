@@ -2,8 +2,8 @@ package BookLending.finder;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * To change this templateMessage file, choose Tools | Templates
+ * and open the templateMessage in the editor.
  */
 import jade.core.*;   
 import jade.core.behaviours.*;   
@@ -45,18 +45,18 @@ public class BookFinderAgent extends Agent{
     myGui.setAgent(this);   
     myGui.show();   
     // Update lender agen tiap 30 detik
-    addBehaviour(new TickerBehaviour(this, 30000) {   
+    addBehaviour(new TickerBehaviour(this, 60000) {   
       protected void onTick() {   
         // Update lender agen
-        DFAgentDescription template = new DFAgentDescription();   
+        DFAgentDescription templateMessage = new DFAgentDescription();   
         ServiceDescription sd = new ServiceDescription();   
         sd.setType("Book-lending");   
-        template.addServices(sd);   
+        templateMessage.addServices(sd);   
         try {   
-          DFAgentDescription[] result = DFService.search(myAgent, template);   
+          DFAgentDescription[] resultLenderList = DFService.search(myAgent, templateMessage);   
           lenderAgents.clear();   
-          for (int i = 0; i < result.length; ++i) {   
-            lenderAgents.addElement(result[i].getName());   
+          for (int i = 0; i < resultLenderList.length; ++i) {   
+            lenderAgents.addElement(resultLenderList[i].getName());   
           }   
         }   
         catch (FIPAException fe) {   
@@ -66,22 +66,23 @@ public class BookFinderAgent extends Agent{
     } );   
   }
     
-    public void rentBook(String title, int maxPrice, Date deadline){
-        addBehaviour(new PurchaseManager(this, title, maxPrice, deadline)); 
+    public void rentBook(String title, int maxPrice, Date deadline, int rentTime){
+        addBehaviour(new RentManager(this, title, maxPrice, deadline, rentTime)); 
     }
     
-    private class PurchaseManager extends TickerBehaviour {   
+    private class RentManager extends TickerBehaviour {   
         private String title;   
-        private int maxPrice, startPrice;   
-        private long deadline, initTime, deltaT;   
+        private int maxPrice, rentTime;   
+        private long deadline, initTime, deltaT;  
 
-        private PurchaseManager(Agent a, String t, int mp, Date d) {   
+        private RentManager(Agent a, String t, int mp, Date d, int r) {   
           super(a, 60000); // tick every minute   
           title = t;   
           maxPrice = mp;   
           deadline = d.getTime();   
           initTime = System.currentTimeMillis();   
-          deltaT = deadline - initTime;   
+          deltaT = deadline - initTime; 
+          rentTime = r;
         }   
 
         public void onTick() {   
@@ -89,15 +90,122 @@ public class BookFinderAgent extends Agent{
           if (currentTime > deadline) {   
             
             //gui message time expired
-            
+            myGui.notifyUser("Cannot rent book "+title); 
             stop();   
           }   
           else {   
               
             long elapsedTime = currentTime - initTime;   
             int acceptablePrice = (int)Math.round(1.0 * maxPrice * (1.0 * elapsedTime / deltaT));   
-
+            myAgent.addBehaviour(new BookNegotiator(title, acceptablePrice, this));   
           }   
         }   
       }
+    
+    private class BookNegotiator extends Behaviour {   
+    private String title;   
+    private int maxPrice;   
+    private RentManager manager;   
+    private AID bestSeller; // The seller agent who provides the best offer   
+    private int bestPrice; // The best offered price   
+    private int repliesCnt = 0; // The counter of replies from seller agents   
+    private MessageTemplate mt; // The template to receive replies   
+    private int step = 0;   
+   
+    public BookNegotiator(String t, int p, RentManager m) {   
+      super(null);   
+      title = t;   
+      maxPrice = p;   
+      manager = m;   
+    }   
+   
+    public void action() {   
+      switch (step) {   
+        case 0:   
+          // Send the cfp to all sellers   
+          ACLMessage cfp = new ACLMessage(ACLMessage.CFP);   
+          for (int i = 0; i < lenderAgents.size(); ++i) {   
+            cfp.addReceiver((AID)lenderAgents.elementAt(i));   
+          }   
+          cfp.setContent(title);   
+          cfp.setConversationId("book-trade");   
+          cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value   
+          myAgent.send(cfp);   
+          myGui.notifyUser("Sent Call for Proposal");   
+   
+          // Prepare the template to get proposals   
+          mt = MessageTemplate.and(   
+          MessageTemplate.MatchConversationId("book-trade"),   
+          MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));   
+          step = 1;   
+          break;   
+        case 1:   
+          // Receive all proposals/refusals from seller agents   
+          ACLMessage reply = myAgent.receive(mt);   
+          if (reply != null) {   
+            // Reply received   
+            if (reply.getPerformative() == ACLMessage.PROPOSE) {   
+              // This is an offer   
+              int price = Integer.parseInt(reply.getContent());   
+              myGui.notifyUser("Received Proposal at "+price+" when maximum acceptable price was "+maxPrice);   
+              if (bestSeller == null || price < bestPrice) {   
+                // This is the best offer at present   
+                bestPrice = price;   
+                bestSeller = reply.getSender();   
+              }   
+            }   
+            repliesCnt++;   
+            if (repliesCnt >= lenderAgents.size()) {   
+              // We received all replies   
+              step = 2;   
+            }   
+          }   
+          else {   
+            block();   
+          }   
+          break;   
+        case 2:   
+          if (bestSeller != null && bestPrice <= maxPrice) {   
+            // Send the purchase order to the seller that provided the best offer   
+            ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);   
+            order.addReceiver(bestSeller);   
+            order.setContent(title);   
+            order.setConversationId("book-trade");   
+            order.setReplyWith("order"+System.currentTimeMillis());   
+            myAgent.send(order);   
+            myGui.notifyUser("sent Accept Proposal");   
+            // Prepare the template to get the purchase order reply   
+            mt = MessageTemplate.and(   
+              MessageTemplate.MatchConversationId("book-trade"),   
+              MessageTemplate.MatchInReplyTo(order.getReplyWith()));   
+            step = 3;   
+          }   
+          else {   
+            // If we received no acceptable proposals, terminate   
+            step = 4;   
+          }   
+          break;   
+        case 3:   
+          // Receive the purchase order reply   
+          reply = myAgent.receive(mt);   
+          if (reply != null) {   
+            // Purchase order reply received   
+            if (reply.getPerformative() == ACLMessage.INFORM) {   
+              // Purchase successful. We can terminate   
+              myGui.notifyUser("Book "+title+" successfully rented. Price = " + bestPrice);   
+              manager.stop();   
+            }   
+            step = 4;   
+          }   
+          else {   
+            block();   
+          }   
+          break;   
+      } // end of switch   
+    }   
+   
+    public boolean done() {   
+      return step == 4;   
+    }   
+  }
 }

@@ -185,13 +185,16 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
         setExec.addActionListener(new ActionListener(){   
         public void actionPerformed(ActionEvent e) {   
             String title = titleTF.getText();    
-            int maxCost = -1;              
+            int maxCost = -1;
+            int rentTime = -1;
+            
             if (title != null && title.length() > 0) {   
                 if (deadline != null && deadline.getTime() > System.currentTimeMillis()) {   
                     try {   
                         //desiredCost = Integer.parseInt(desiredCostTF.getText());   
                         try {   
                             maxCost = Integer.parseInt(maxCostTF.getText());   
+                            rentTime = Integer.parseInt(lamaPinjamTF.getText());
                             // if (maxCost >= desiredCost) {   
                                 // myAgent.purchase(title, desiredCost, maxCost, deadline.getTime());   
                                 //myAgent.purchase(title, maxCost, deadline);   

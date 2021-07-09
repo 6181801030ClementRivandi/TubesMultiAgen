@@ -175,17 +175,19 @@ public class BookLenderGuiImpl extends JFrame implements BookLenderGui {
         setExec.addActionListener(new ActionListener(){   
         public void actionPerformed(ActionEvent e) {   
             String title = titleTF.getText();    
-            int maxCost = -1;              
+            int maxPrice = -1;              
+            int minCost = -1;
             if (title != null && title.length() > 0) {   
                 if (deadline != null && deadline.getTime() > System.currentTimeMillis()) {   
                     try {   
                         //desiredCost = Integer.parseInt(desiredCostTF.getText());   
                         try {   
-                            maxCost = Integer.parseInt(maxCostTF.getText());   
-                            // if (maxCost >= desiredCost) {   
-                                // myAgent.purchase(title, desiredCost, maxCost, deadline.getTime());   
-                                //myAgent.purchase(title, maxCost, deadline);   
-                  notifyUser("PUT FOR LEND: "+title+" at max "+maxCost+" by "+deadline);    
+                            maxPrice = Integer.parseInt(maxCostTF.getText());  
+                            minCost = Integer.parseInt(minCostTF.getText());
+                            // if (maxPrice >= desiredCost) {   
+                                // myAgent.purchase(title, desiredCost, maxPrice, deadline.getTime());   
+                                //myAgent.purchase(title, maxPrice, deadline);   
+                  notifyUser("PUT FOR LEND: "+title+" at max "+maxPrice+" by "+deadline);    
                             //}   
                             //else {   
                                 // Max cost < desiredCost   

@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class BookLenderAgent extends Agent {  
   // katalog buku
-  private Map catalogue = new HashMap();  
+  private Map BookList = new HashMap();  
   
   // Gui 
   private BookLenderGui myGui;  
@@ -32,60 +32,45 @@ public class BookLenderAgent extends Agent {
     // menambah behaviour
     addBehaviour(new CallForOfferServer());  
   
-    DFAgentDescription dfd = new DFAgentDescription();  
-    dfd.setName(getAID());  
+    DFAgentDescription LenderAgentList = new DFAgentDescription();  
+    LenderAgentList.setName(getAID());  
     ServiceDescription sd = new ServiceDescription();  
-    sd.setType("Book-lending");  
-    sd.setName(getLocalName()+"-Book-lending");  
-    dfd.addServices(sd);  
+    sd.setType("Book-selling");  
+    sd.setName(getLocalName()+"-Book-selling");  
+    LenderAgentList.addServices(sd);  
     try {  
-      DFService.register(this, dfd);  
+      DFService.register(this, LenderAgentList);  
     }  
     catch (FIPAException fe) {  
       fe.printStackTrace();  
     }  
   }  
   
-  protected void takeDown() {  
-    if (myGui != null) {  
-      myGui.dispose();  
-    }  
-  
-    System.out.println("lender-agent "+getAID().getName()+"terminating.");  
-  
-    try {  
-      DFService.deregister(this);  
-    }  
-    catch (FIPAException fe) {  
-      fe.printStackTrace();  
-    }  
-  }  
-
-  public void putForSale(String title, int initPrice, int minPrice, Date deadline) {  
-    addBehaviour(new PriceManager(this, title, initPrice, minPrice, deadline));  
+  public void putForSale(String title, int maxPrice, int minPrice, Date deadline) {  
+    addBehaviour(new PriceManager(this, title, maxPrice, minPrice, deadline));  
   }  
   
   
   
   private class PriceManager extends TickerBehaviour {  
     private String title;  
-    private int minPrice, currentPrice, initPrice, deltaP;  
+    private int minPrice, currentPrice, maxPrice, deltaP;  
     private long initTime, deadline, deltaT;  
   
     private PriceManager(Agent a, String t, int ip, int mp, Date d) {  
       super(a, 60000); // tick every minute  
       title = t;  
-      initPrice = ip;  
-      currentPrice = initPrice;  
-      deltaP = initPrice - mp;  
+      maxPrice = ip;  
+      currentPrice = maxPrice;  
+      deltaP = maxPrice - mp;  
       deadline = d.getTime();  
       initTime = System.currentTimeMillis();  
       deltaT = ((deadline - initTime) > 0 ? (deadline - initTime) : 60000);  
     }  
   
     public void onStart() {  
-      // Insert the book in the catalogue of books available for sale  
-      catalogue.put(title, this);  
+      // Insert the book in the BookList of books available for sale  
+      BookList.put(title, this);  
       super.onStart();  
     }  
   
@@ -93,14 +78,14 @@ public class BookLenderAgent extends Agent {
       long currentTime = System.currentTimeMillis();  
       if (currentTime > deadline) {  
         // Deadline expired  
-        myGui.notifyUser("Cannot sell book "+title);  
-        catalogue.remove(title);  
+        myGui.notifyUser("Cannot rent book "+title);  
+        BookList.remove(title);  
         stop();  
       }  
       else {  
         // Compute the current price  
         long elapsedTime = currentTime - initTime;  
-        currentPrice = (int)Math.round(initPrice - 1.0 * deltaP * (1.0 * elapsedTime / deltaT));  
+        currentPrice = (int)Math.round(maxPrice - 1.0 * deltaP * (1.0 * elapsedTime / deltaT));  
       }  
     }  
   
@@ -117,9 +102,9 @@ public class BookLenderAgent extends Agent {
       if (msg != null) {  
         // CFP Message received. Process it  
         String title = msg.getContent();  
-        myGui.notifyUser("Received Proposal to buy "+title);  
+        myGui.notifyUser("Received Proposal to rent "+title);  
         ACLMessage reply = msg.createReply();  
-        PriceManager pm = (PriceManager) catalogue.get(title);  
+        PriceManager pm = (PriceManager) BookList.get(title);  
         if (pm != null) {  
           // The requested book is available for sale. Reply with the price  
           reply.setPerformative(ACLMessage.PROPOSE);  
@@ -130,7 +115,7 @@ public class BookLenderAgent extends Agent {
           reply.setPerformative(ACLMessage.REFUSE);  
         }  
         myAgent.send(reply);  
-        myGui.notifyUser(pm != null ? "Sent Proposal to sell at "+reply.getContent() : "Refused Proposal as the book is not for sale");  
+        myGui.notifyUser(pm != null ? "Sent Proposal to rent at "+reply.getContent() : "Refused Proposal as the book is not for sale");  
       }  
       else {  
         block();  
