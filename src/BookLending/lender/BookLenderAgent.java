@@ -35,8 +35,8 @@ public class BookLenderAgent extends Agent {
     DFAgentDescription LenderAgentList = new DFAgentDescription();  
     LenderAgentList.setName(getAID());  
     ServiceDescription sd = new ServiceDescription();  
-    sd.setType("Book-selling");  
-    sd.setName(getLocalName()+"-Book-selling");  
+    sd.setType("Book-lending");  
+    sd.setName(getLocalName()+"-Book-lending");  
     LenderAgentList.addServices(sd);  
     try {  
       DFService.register(this, LenderAgentList);  

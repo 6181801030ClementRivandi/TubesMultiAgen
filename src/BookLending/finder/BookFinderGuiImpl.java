@@ -197,7 +197,7 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
                             rentTime = Integer.parseInt(lamaPinjamTF.getText());
                             // if (maxCost >= desiredCost) {   
                                 // myAgent.purchase(title, desiredCost, maxCost, deadline.getTime());   
-                                //myAgent.purchase(title, maxCost, deadline);   
+                                myAgent.rentBook(title, maxCost, deadline,rentTime);   
                   notifyUser("PUT FOR FIND: "+title+" at max "+maxCost+" by "+deadline);    
                             //}   
                             //else {   

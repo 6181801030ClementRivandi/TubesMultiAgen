@@ -186,7 +186,7 @@ public class BookLenderGuiImpl extends JFrame implements BookLenderGui {
                             minCost = Integer.parseInt(minCostTF.getText());
                             // if (maxPrice >= desiredCost) {   
                                 // myAgent.purchase(title, desiredCost, maxPrice, deadline.getTime());   
-                                //myAgent.purchase(title, maxPrice, deadline);   
+                                myAgent.putForSale(title, maxPrice, minCost,deadline);   
                   notifyUser("PUT FOR LEND: "+title+" at max "+maxPrice+" by "+deadline);    
                             //}   
                             //else {   
