@@ -3,12 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package BookLending.finder;
+package BookLending.courier;
 
-/**
- *
- * @author ASUS
- */
+import BookLending.lender.*;
 import jade.gui.TimeChooser;   
    
 import java.awt.*;   
@@ -17,20 +14,16 @@ import javax.swing.*;
 import javax.swing.border.*;   
    
 import java.util.Date;   
-   
-/**  
-   J2SE (Swing-based) implementation of the GUI of the agent that   
-   tries to buy books on behalf of its user  
- */   
-public class BookFinderGuiImpl extends JFrame implements BookFinderGui {   
-    private BookFinderAgent myAgent;   
+    
+public class BookCourierGuiImpl extends JFrame implements BookCourierGui {   
+    private BookCourierAgent myAgent;   
        
-    private JTextField titleTF, maxCostTF, lamaPinjamTF, deadlineTF, alamatTF;   
+    private JTextField titleTF, maxCostTF, minCostTF, deadlineTF;   
     private JButton setDeadlineB, setExec;   
     private JTextArea logTA;   
     private Date deadline;   
        
-    public BookFinderGuiImpl() {   
+    public BookCourierGuiImpl() {   
         super();   
            
         addWindowListener(new   WindowAdapter() {   
@@ -38,9 +31,7 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
                 myAgent.doDelete();   
             }   
         } );   
-   
-           
-   
+
         JPanel rootPanel = new JPanel();   
         rootPanel.setLayout(new GridBagLayout());   
     rootPanel.setMinimumSize(new Dimension(330, 125));   
@@ -96,7 +87,7 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
     ///////////   
     // Line 2   
     ///////////    
-        l = new JLabel("Lama pinjam");   
+        l = new JLabel("Harga Minimal");   
     l.setHorizontalAlignment(SwingConstants.LEFT);   
     l.setMinimumSize(new Dimension(100, 20));   
     l.setPreferredSize(new Dimension(100, 20));   
@@ -107,48 +98,24 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
     gridBagConstraints.insets = new java.awt.Insets(5, 3, 0, 3);   
     rootPanel.add(l, gridBagConstraints); 
     
-    lamaPinjamTF = new JTextField(64);   
-    lamaPinjamTF.setMinimumSize(new Dimension(80, 20));   
-    lamaPinjamTF.setPreferredSize(new Dimension(80, 20));   
+    minCostTF = new JTextField(64);   
+    minCostTF.setMinimumSize(new Dimension(80, 20));   
+    minCostTF.setPreferredSize(new Dimension(80, 20));   
     gridBagConstraints = new GridBagConstraints();   
     gridBagConstraints.gridx = 1;   
     gridBagConstraints.gridy = 2;   
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;   
     gridBagConstraints.insets = new Insets(5, 3, 0, 3);   
-    rootPanel.add(lamaPinjamTF, gridBagConstraints); 
+    rootPanel.add(minCostTF, gridBagConstraints); 
     
     ///////////   
-    // Line 3   
-    ///////////    
-        l = new JLabel("Alamat");   
-    l.setHorizontalAlignment(SwingConstants.LEFT);   
-    l.setMinimumSize(new Dimension(100, 20));   
-    l.setPreferredSize(new Dimension(100, 20));   
-    gridBagConstraints = new GridBagConstraints();   
-    gridBagConstraints.gridx = 0;   
-    gridBagConstraints.gridy = 3;   
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;   
-    gridBagConstraints.insets = new java.awt.Insets(5, 3, 0, 3);   
-    rootPanel.add(l, gridBagConstraints); 
-    
-    alamatTF = new JTextField(64);   
-    alamatTF.setMinimumSize(new Dimension(120, 20));   
-    alamatTF.setPreferredSize(new Dimension(120, 20));   
-    gridBagConstraints = new GridBagConstraints();   
-    gridBagConstraints.gridx = 1;   
-    gridBagConstraints.gridy = 3;   
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;   
-    gridBagConstraints.insets = new Insets(5, 3, 0, 3);   
-    rootPanel.add(alamatTF, gridBagConstraints); 
-    
-    ///////////   
-    // Line 4  
+    // Line 3  
     ///////////   
         l = new JLabel("Batas waktu");   
     l.setHorizontalAlignment(SwingConstants.LEFT);   
     gridBagConstraints = new GridBagConstraints();   
     gridBagConstraints.gridx = 0;   
-    gridBagConstraints.gridy = 4;   
+    gridBagConstraints.gridy = 3;   
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;   
     gridBagConstraints.insets = new java.awt.Insets(5, 3, 0, 3);   
     rootPanel.add(l, gridBagConstraints);   
@@ -159,7 +126,7 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
     deadlineTF.setEnabled(false);   
     gridBagConstraints = new GridBagConstraints();   
     gridBagConstraints.gridx = 1;   
-    gridBagConstraints.gridy = 4;   
+    gridBagConstraints.gridy = 3;   
     gridBagConstraints.gridwidth = 2;   
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;   
     gridBagConstraints.insets = new Insets(5, 3, 0, 3);   
@@ -175,7 +142,7 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
                 d = new Date();   
             }   
             TimeChooser tc = new TimeChooser(d);   
-            if (tc.showEditTimeDlg(BookFinderGuiImpl.this) == TimeChooser.OK) {   
+            if (tc.showEditTimeDlg(BookCourierGuiImpl.this) == TimeChooser.OK) {   
                 deadline = tc.getDate();   
                 deadlineTF.setText(deadline.toString());   
             }   
@@ -183,7 +150,7 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
         } );   
     gridBagConstraints = new GridBagConstraints();   
     gridBagConstraints.gridx = 3;   
-    gridBagConstraints.gridy = 4;   
+    gridBagConstraints.gridy = 3;   
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;   
     gridBagConstraints.insets = new Insets(5, 3, 0, 3);   
     rootPanel.add(setDeadlineB, gridBagConstraints);     
@@ -209,20 +176,17 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
         setExec.addActionListener(new ActionListener(){   
         public void actionPerformed(ActionEvent e) {   
             String title = titleTF.getText();    
-            int maxCost = -1;
-            int rentTime = -1;
-            
+            int maxCost = -1;              
             if (title != null && title.length() > 0) {   
                 if (deadline != null && deadline.getTime() > System.currentTimeMillis()) {   
                     try {   
                         //desiredCost = Integer.parseInt(desiredCostTF.getText());   
                         try {   
                             maxCost = Integer.parseInt(maxCostTF.getText());   
-                            rentTime = Integer.parseInt(lamaPinjamTF.getText());
                             // if (maxCost >= desiredCost) {   
                                 // myAgent.purchase(title, desiredCost, maxCost, deadline.getTime());   
-                                myAgent.rentBook(title, maxCost, deadline,rentTime);   
-                  notifyUser("PUT FOR FIND: "+title+" at max "+maxCost+" by "+deadline);    
+                                //myAgent.purchase(title, maxCost, deadline);   
+                  notifyUser("PUT FOR LEND: "+title+" at max "+maxCost+" by "+deadline);    
                             //}   
                             //else {   
                                 // Max cost < desiredCost   
@@ -231,18 +195,18 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
                         }   
                         catch (Exception ex1) {   
                             // Invalid max cost   
-                            JOptionPane.showMessageDialog(BookFinderGuiImpl.this, "Invalid max cost", "WARNING", JOptionPane.WARNING_MESSAGE);   
+                            JOptionPane.showMessageDialog(BookCourierGuiImpl.this, "Invalid max cost", "WARNING", JOptionPane.WARNING_MESSAGE);   
                         }   
                     }   
                     catch (Exception ex2) {   
                         // No deadline specified   
-                        JOptionPane.showMessageDialog(BookFinderGuiImpl.this, "Invalid deadline", "WARNING", JOptionPane.WARNING_MESSAGE); 
+                        JOptionPane.showMessageDialog(BookCourierGuiImpl.this, "Invalid deadline", "WARNING", JOptionPane.WARNING_MESSAGE); 
                     }   
                 }   
             }   
             else {   
                 // No book title specified   
-                JOptionPane.showMessageDialog(BookFinderGuiImpl.this, "No book title specified", "WARNING", JOptionPane.WARNING_MESSAGE);   
+                JOptionPane.showMessageDialog(BookCourierGuiImpl.this, "No book title specified", "WARNING", JOptionPane.WARNING_MESSAGE);   
             }   
         }   
         } );    
@@ -257,7 +221,7 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
     setResizable(false);   
     }   
    
-    public void setAgent(BookFinderAgent a) {   
+    public void setAgent(BookLenderAgent a) {   
         myAgent = a;   
         setTitle(myAgent.getName());   
     }   
@@ -265,4 +229,9 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
     public void notifyUser(String message) {   
         logTA.append(message+"\n");   
     }   
+
+    @Override
+    public void setAgent(BookCourierAgent a) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }     
