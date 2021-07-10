@@ -26,8 +26,7 @@ public class BookCourierAgent extends Agent {
   protected void setup() {  
       
     System.out.println("courier-agent "+getAID().getName()+" is ready.");  
-  
-    // Create and show the GUI  
+
     myGui = new BookCourierGuiImpl();  
     myGui.setAgent(this);  
     myGui.show();  

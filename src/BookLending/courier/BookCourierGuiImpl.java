@@ -17,11 +17,9 @@ import java.util.Date;
     
 public class BookCourierGuiImpl extends JFrame implements BookCourierGui {   
     private BookCourierAgent myAgent;   
-       
-    private JTextField titleTF, maxCostTF, minCostTF, deadlineTF;   
-    private JButton setDeadlineB, setExec;   
-    private JTextArea logTA;   
-    private Date deadline;   
+          
+    private JButton setExec;
+    private JTextArea logTA;    
        
     public BookCourierGuiImpl() {   
         super();   
@@ -35,131 +33,8 @@ public class BookCourierGuiImpl extends JFrame implements BookCourierGui {
         JPanel rootPanel = new JPanel();   
         rootPanel.setLayout(new GridBagLayout());   
     rootPanel.setMinimumSize(new Dimension(330, 125));   
-    rootPanel.setPreferredSize(new Dimension(330, 125));   
-           
-    ///////////   
-    // Line 0   
-    ///////////   
-        JLabel l = new JLabel("Judul");   
-    l.setHorizontalAlignment(SwingConstants.LEFT);   
-    GridBagConstraints gridBagConstraints = new GridBagConstraints();   
-    gridBagConstraints.gridx = 0;   
-    gridBagConstraints.gridy = 0;   
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;   
-    gridBagConstraints.insets = new java.awt.Insets(5, 3, 0, 3);   
-    rootPanel.add(l, gridBagConstraints);   
-   
-    titleTF = new JTextField(64);   
-    titleTF.setMinimumSize(new Dimension(210, 20));   
-    titleTF.setPreferredSize(new Dimension(210, 20));   
-    gridBagConstraints = new GridBagConstraints();   
-    gridBagConstraints.gridx = 1;   
-    gridBagConstraints.gridy = 0;   
-    gridBagConstraints.gridwidth = 3;   
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;   
-    gridBagConstraints.insets = new Insets(5, 3, 0, 3);   
-    rootPanel.add(titleTF, gridBagConstraints);   
-   
-    ///////////   
-    // Line 1   
-    ///////////    
-        l = new JLabel("Harga Maksimal");   
-    l.setHorizontalAlignment(SwingConstants.LEFT);   
-    l.setMinimumSize(new Dimension(100, 20));   
-    l.setPreferredSize(new Dimension(100, 20));   
-    gridBagConstraints = new GridBagConstraints();   
-    gridBagConstraints.gridx = 0;   
-    gridBagConstraints.gridy = 1;   
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;   
-    gridBagConstraints.insets = new java.awt.Insets(5, 3, 0, 3);   
-    rootPanel.add(l, gridBagConstraints); 
+    rootPanel.setPreferredSize(new Dimension(330, 125));     
     
-    maxCostTF = new JTextField(64);   
-    maxCostTF.setMinimumSize(new Dimension(80, 20));   
-    maxCostTF.setPreferredSize(new Dimension(80, 20));   
-    gridBagConstraints = new GridBagConstraints();   
-    gridBagConstraints.gridx = 1;   
-    gridBagConstraints.gridy = 1;   
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;   
-    gridBagConstraints.insets = new Insets(5, 3, 0, 3);   
-    rootPanel.add(maxCostTF, gridBagConstraints);
-    
-    ///////////   
-    // Line 2   
-    ///////////    
-        l = new JLabel("Harga Minimal");   
-    l.setHorizontalAlignment(SwingConstants.LEFT);   
-    l.setMinimumSize(new Dimension(100, 20));   
-    l.setPreferredSize(new Dimension(100, 20));   
-    gridBagConstraints = new GridBagConstraints();   
-    gridBagConstraints.gridx = 0;   
-    gridBagConstraints.gridy = 2;   
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;   
-    gridBagConstraints.insets = new java.awt.Insets(5, 3, 0, 3);   
-    rootPanel.add(l, gridBagConstraints); 
-    
-    minCostTF = new JTextField(64);   
-    minCostTF.setMinimumSize(new Dimension(80, 20));   
-    minCostTF.setPreferredSize(new Dimension(80, 20));   
-    gridBagConstraints = new GridBagConstraints();   
-    gridBagConstraints.gridx = 1;   
-    gridBagConstraints.gridy = 2;   
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;   
-    gridBagConstraints.insets = new Insets(5, 3, 0, 3);   
-    rootPanel.add(minCostTF, gridBagConstraints); 
-    
-    ///////////   
-    // Line 3  
-    ///////////   
-        l = new JLabel("Batas waktu");   
-    l.setHorizontalAlignment(SwingConstants.LEFT);   
-    gridBagConstraints = new GridBagConstraints();   
-    gridBagConstraints.gridx = 0;   
-    gridBagConstraints.gridy = 3;   
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;   
-    gridBagConstraints.insets = new java.awt.Insets(5, 3, 0, 3);   
-    rootPanel.add(l, gridBagConstraints);   
-   
-    deadlineTF = new JTextField(64);   
-    deadlineTF.setMinimumSize(new Dimension(146, 20));   
-    deadlineTF.setPreferredSize(new Dimension(146, 20));   
-    deadlineTF.setEnabled(false);   
-    gridBagConstraints = new GridBagConstraints();   
-    gridBagConstraints.gridx = 1;   
-    gridBagConstraints.gridy = 3;   
-    gridBagConstraints.gridwidth = 2;   
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;   
-    gridBagConstraints.insets = new Insets(5, 3, 0, 3);   
-    rootPanel.add(deadlineTF, gridBagConstraints);   
-   
-    setDeadlineB = new JButton("Set");   
-    setDeadlineB.setMinimumSize(new Dimension(70, 20));   
-    setDeadlineB.setPreferredSize(new Dimension(70, 20));   
-        setDeadlineB.addActionListener(new ActionListener(){   
-        public void actionPerformed(ActionEvent e) {   
-            Date d = deadline;   
-            if (d == null) {   
-                d = new Date();   
-            }   
-            TimeChooser tc = new TimeChooser(d);   
-            if (tc.showEditTimeDlg(BookCourierGuiImpl.this) == TimeChooser.OK) {   
-                deadline = tc.getDate();   
-                deadlineTF.setText(deadline.toString());   
-            }   
-        }   
-        } );   
-    gridBagConstraints = new GridBagConstraints();   
-    gridBagConstraints.gridx = 3;   
-    gridBagConstraints.gridy = 3;   
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;   
-    gridBagConstraints.insets = new Insets(5, 3, 0, 3);   
-    rootPanel.add(setDeadlineB, gridBagConstraints);     
-           
-    rootPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));   
-       
-    getContentPane().add(rootPanel, BorderLayout.NORTH);   
-       
-       
     logTA = new JTextArea();   
     logTA.setEnabled(false);   
     JScrollPane jsp = new JScrollPane(logTA);   
@@ -174,42 +49,16 @@ public class BookCourierGuiImpl extends JFrame implements BookCourierGui {
     p = new JPanel();   
     setExec = new JButton("Execute Order");   
         setExec.addActionListener(new ActionListener(){   
-        public void actionPerformed(ActionEvent e) {   
-            String title = titleTF.getText();    
-            int maxCost = -1;              
-            if (title != null && title.length() > 0) {   
-                if (deadline != null && deadline.getTime() > System.currentTimeMillis()) {   
-                    try {   
-                        //desiredCost = Integer.parseInt(desiredCostTF.getText());   
-                        try {   
-                            maxCost = Integer.parseInt(maxCostTF.getText());   
-                            // if (maxCost >= desiredCost) {   
-                                // myAgent.purchase(title, desiredCost, maxCost, deadline.getTime());   
-                                //myAgent.purchase(title, maxCost, deadline);   
-                  notifyUser("PUT FOR LEND: "+title+" at max "+maxCost+" by "+deadline);    
-                            //}   
-                            //else {   
-                                // Max cost < desiredCost   
-                                //JOptionPane.showMessageDialog(BookBuyerGuiImpl.this, "Max cost must be greater than best cost", "WARNING", JOptionPane.WARNING_MESSAGE);   
-                            //}                                
-                        }   
-                        catch (Exception ex1) {   
-                            // Invalid max cost   
-                            JOptionPane.showMessageDialog(BookCourierGuiImpl.this, "Invalid max cost", "WARNING", JOptionPane.WARNING_MESSAGE);   
-                        }   
-                    }   
-                    catch (Exception ex2) {   
-                        // No deadline specified   
-                        JOptionPane.showMessageDialog(BookCourierGuiImpl.this, "Invalid deadline", "WARNING", JOptionPane.WARNING_MESSAGE); 
-                    }   
-                }   
+        public void actionPerformed(ActionEvent e) {                
+            try {    
+//                myAgent.purchase(title, desiredCost, maxCost, deadline.getTime());   
+//                myAgent.purchase(title, maxCost, deadline);                                                 
             }   
-            else {   
-                // No book title specified   
-                JOptionPane.showMessageDialog(BookCourierGuiImpl.this, "No book title specified", "WARNING", JOptionPane.WARNING_MESSAGE);   
-            }   
+            catch (Exception ex1) {    
+                JOptionPane.showMessageDialog(BookCourierGuiImpl.this, "Invalid information", "WARNING", JOptionPane.WARNING_MESSAGE);   
+            } 
         }   
-        } );    
+        });    
        
     p.add(setExec);    
        
@@ -221,7 +70,7 @@ public class BookCourierGuiImpl extends JFrame implements BookCourierGui {
     setResizable(false);   
     }   
    
-    public void setAgent(BookLenderAgent a) {   
+    public void setAgent(BookCourierAgent a) {   
         myAgent = a;   
         setTitle(myAgent.getName());   
     }   
@@ -229,9 +78,4 @@ public class BookCourierGuiImpl extends JFrame implements BookCourierGui {
     public void notifyUser(String message) {   
         logTA.append(message+"\n");   
     }   
-
-    @Override
-    public void setAgent(BookCourierAgent a) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }     
