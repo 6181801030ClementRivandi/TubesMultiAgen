@@ -66,16 +66,16 @@ public class BookFinderAgent extends Agent{
     } );   
   }
     
-    public void rentBook(String title, int maxPrice, Date deadline, int rentTime){
-        addBehaviour(new RentManager(this, title, maxPrice, deadline, rentTime)); 
+    public void rentBook(String title, int maxPrice, Date deadline, int rentTime,String address){
+        addBehaviour(new RentManager(this, title, maxPrice, deadline, rentTime,address)); 
     }
     
     private class RentManager extends TickerBehaviour {   
-        private String title;   
+        private String title, address;   
         private int maxPrice, rentTime;   
         private long deadline, initTime, deltaT;  
 
-        private RentManager(Agent a, String t, int mp, Date d, int r) {   
+        private RentManager(Agent a, String t, int mp, Date d, int r, String address) {   
           super(a, 60000); // tick every minute   
           title = t;   
           maxPrice = mp;   
@@ -83,6 +83,7 @@ public class BookFinderAgent extends Agent{
           initTime = System.currentTimeMillis();   
           deltaT = deadline - initTime; 
           rentTime = r;
+          this.address = address;
         }   
 
         public void onTick() {   
@@ -97,7 +98,7 @@ public class BookFinderAgent extends Agent{
               
             long elapsedTime = currentTime - initTime;   
             int acceptablePrice = (int)Math.round(1.0 * maxPrice * (1.0 * elapsedTime / deltaT));   
-            myAgent.addBehaviour(new BookNegotiator(title, acceptablePrice, this));   
+            myAgent.addBehaviour(new BookNegotiator(title, acceptablePrice, this,this.address));   
           }   
         }   
       }
@@ -111,12 +112,14 @@ public class BookFinderAgent extends Agent{
     private int repliesCnt = 0; // The counter of replies from seller agents   
     private MessageTemplate mt; // The template to receive replies   
     private int step = 0;   
+    private String address;
    
-    public BookNegotiator(String t, int p, RentManager m) {   
+    public BookNegotiator(String t, int p, RentManager m,String a) {   
       super(null);   
       title = t;   
       maxPrice = p;   
-      manager = m;   
+      manager = m; 
+      this.address = a;
     }   
    
     public void action() {   
@@ -172,8 +175,17 @@ public class BookFinderAgent extends Agent{
             order.setContent(title);   
             order.setConversationId("book-trade");   
             order.setReplyWith("order"+System.currentTimeMillis());   
+            
+            // with address of the order
+            ACLMessage orderAddress = new ACLMessage(ACLMessage.CFP);
+            orderAddress.setContent(title);
+            orderAddress.setConversationId("book-trade-address");
+            orderAddress.setReplyWith("address" + address);
+                        
             myAgent.send(order);   
+            myAgent.send(orderAddress);
             myGui.notifyUser("sent Accept Proposal");   
+            myGui.notifyUser("sent Address to Courier");
             // Prepare the template to get the purchase order reply   
             mt = MessageTemplate.and(   
               MessageTemplate.MatchConversationId("book-trade"),   

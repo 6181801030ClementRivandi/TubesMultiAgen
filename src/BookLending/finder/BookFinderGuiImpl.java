@@ -211,6 +211,7 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
             String title = titleTF.getText();    
             int maxCost = -1;
             int rentTime = -1;
+            String address = null;
             
             if (title != null && title.length() > 0) {   
                 if (deadline != null && deadline.getTime() > System.currentTimeMillis()) {   
@@ -219,9 +220,10 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
                         try {   
                             maxCost = Integer.parseInt(maxCostTF.getText());   
                             rentTime = Integer.parseInt(lamaPinjamTF.getText());
+                            address = String.valueOf(lamaPinjamTF.getText());
                             // if (maxCost >= desiredCost) {   
                                 // myAgent.purchase(title, desiredCost, maxCost, deadline.getTime());   
-                                myAgent.rentBook(title, maxCost, deadline,rentTime);   
+                                myAgent.rentBook(title, maxCost, deadline,rentTime,address);   
                   notifyUser("PUT FOR FIND: "+title+" at max "+maxCost+" by "+deadline);    
                             //}   
                             //else {   
