@@ -66,7 +66,7 @@ public class BookCourierAgent extends Agent {
       
       if(msgMtp != null){
           String duration = msgMtp.getContent();
-          myGui.notifyUser("Duration: " + duration);
+          myGui.notifyUser("Duration: " + duration + " days");
           myGui.notifyUser("Sending Book...");
       }
     }  
