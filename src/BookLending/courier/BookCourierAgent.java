@@ -49,7 +49,7 @@ public class BookCourierAgent extends Agent {
   }
   
     private class StartCourierJob extends CyclicBehaviour {  
-     private MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.CFP),MessageTemplate.MatchConversationId("book-trade-address"));
+     private MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.AGREE),MessageTemplate.MatchConversationId("book-trade-address"));
      
      public void action() {  
         //myGui.notifyUser("Courier Activated");

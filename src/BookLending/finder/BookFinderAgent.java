@@ -91,7 +91,7 @@ public class BookFinderAgent extends Agent{
           if (currentTime > deadline) {   
             
             //gui message time expired
-            myGui.notifyUser("Cannot rent book "+title); 
+            myGui.notifyUser("Timeout book: "+title); 
             stop();   
           }   
           else {   
@@ -127,13 +127,20 @@ public class BookFinderAgent extends Agent{
       switch (step) {   
         case 0:   
           // Send the cfp to all sellers   
-          ACLMessage cfp = new ACLMessage(ACLMessage.CFP);   
+          ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+          //ACLMessage cfp_price_offer = new ACLMessage(ACLMessage.CFP);
+          
           for (int i = 0; i < lenderAgents.size(); ++i) {   
-            cfp.addReceiver((AID)lenderAgents.elementAt(i));   
+            cfp.addReceiver((AID)lenderAgents.elementAt(i));  
+            //cfp_price_offer.addReceiver((AID)lenderAgents.elementAt(i));  
           }   
+          
           cfp.setContent(title);   
           cfp.setConversationId("book-trade");   
-          cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value   
+          cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value 
+          
+          //cfp_price_offer.setContent(HARGA);
+          
           myAgent.send(cfp);   
           myGui.notifyUser("Sent Call for Proposal");   
    
@@ -178,7 +185,8 @@ public class BookFinderAgent extends Agent{
           break;   
         case 2:   
           if (bestSeller != null && bestPrice <= maxPrice) {  
-                System.out.println("step: 2");
+            step = 3; 
+            System.out.println("step: 2");
             // Send the purchase order to the seller that provided the best offer   
             ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);   
             order.addReceiver(bestSeller);   
@@ -188,9 +196,10 @@ public class BookFinderAgent extends Agent{
             
             myAgent.send(order);  
             myGui.notifyUser("sent Accept Proposal"); 
+            step = 3; 
             
             // with address of the order 
-            ACLMessage orderAddress = new ACLMessage(ACLMessage.CFP);
+            ACLMessage orderAddress = new ACLMessage(ACLMessage.AGREE);
             orderAddress.setContent(address);
             orderAddress.setConversationId("book-trade-address");
             orderAddress.setReplyWith("order"+System.currentTimeMillis());
@@ -198,10 +207,29 @@ public class BookFinderAgent extends Agent{
             myGui.notifyUser("sent Address to Courier");
             
             // Prepare the template to get the purchase order reply   
-            mt = MessageTemplate.and(   
-              MessageTemplate.MatchConversationId("book-trade"),   
-              MessageTemplate.MatchInReplyTo(order.getReplyWith()));   
+            //mt = MessageTemplate.and(   
+              //MessageTemplate.MatchConversationId("book-trade"),   
+              //MessageTemplate.MatchInReplyTo(order.getReplyWith()));   
+              mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
             step = 3;  
+            
+            if(step == 3){
+                reply = myAgent.receive(mt);   
+                if (reply != null) {   
+                  // Purchase order reply received   
+                  if (reply.getPerformative() == ACLMessage.INFORM) {   
+                    // Purchase successful. We can terminate   
+                    myGui.notifyUser("Book "+title+" successfully rented. Price = " + bestPrice);   
+                    manager.stop();   
+                  }   
+                  step = 4;   
+                }   
+                else {   
+                  block();   
+                }   
+                break; 
+            }
+            
              
           }   
           else {   

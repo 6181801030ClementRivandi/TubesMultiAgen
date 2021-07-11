@@ -60,9 +60,9 @@ public class BookLenderAgent extends Agent {
     private PriceManager(Agent a, String t, int ip, int mp, Date d) {  
       super(a, 15000); // tick every minute  
       title = t;  
-      maxPrice = ip;  
+      maxPrice = ip;  //max price dari param
       currentPrice = maxPrice;  
-      deltaP = maxPrice - mp;  
+      deltaP = maxPrice - mp;  // range harga dari maksimum dan minimum
       deadline = d.getTime();  
       initTime = System.currentTimeMillis();  
       deltaT = ((deadline - initTime) > 0 ? (deadline - initTime) : 15000);  
@@ -78,7 +78,7 @@ public class BookLenderAgent extends Agent {
       long currentTime = System.currentTimeMillis();  
       if (currentTime > deadline) {  
         // Deadline expired  
-        myGui.notifyUser("Cannot rent book "+title);  
+        myGui.notifyUser("Timeout book: "+title);  
         BookList.remove(title);  
         stop();  
       }  
@@ -97,24 +97,32 @@ public class BookLenderAgent extends Agent {
  
   private class CallForOfferServer extends CyclicBehaviour {  
     private MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);  
-  
+    private MessageTemplate st = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
     public void action() {  
       ACLMessage msg = myAgent.receive(mt);  
-      if (msg != null) {  
+      ACLMessage successMsg = myAgent.receive(st);
+      
+      if (successMsg != null ){
+            ACLMessage replySuccess = successMsg.createReply();
+            replySuccess.setPerformative(ACLMessage.INFORM);        
+            myGui.notifyUser("Order accepted.");
+            successMsg = null;
+            msg = null;
+            block();
+        }
+      else if (msg != null) {  
         // CFP Message received. Process it  
         String title = msg.getContent();  
         myGui.notifyUser("Received Proposal to rent "+title);  
-        ACLMessage reply = msg.createReply();  
+        ACLMessage reply = msg.createReply(); 
+        
         PriceManager pm = (PriceManager) BookList.get(title);  
         if (pm != null) {  
           // The requested book is available for sale. Reply with the price 
-          
-          
-          //if (priceOfferFromBuyer >= priceSellerOffer){
-            // reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-          //}
-          reply.setPerformative(ACLMessage.PROPOSE);  
-          reply.setContent(String.valueOf(pm.getCurrentPrice()));  
+
+        reply.setPerformative(ACLMessage.PROPOSE);  
+        reply.setContent(String.valueOf(pm.getCurrentPrice())); 
+                            
         }  
         else {  
           // The requested book is NOT available for sale.  
