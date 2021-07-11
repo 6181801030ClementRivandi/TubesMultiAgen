@@ -220,7 +220,7 @@ public class BookFinderGuiImpl extends JFrame implements BookFinderGui {
                         try {   
                             maxCost = Integer.parseInt(maxCostTF.getText());   
                             rentTime = Integer.parseInt(lamaPinjamTF.getText());
-                            address = String.valueOf(lamaPinjamTF.getText());
+                            address = String.valueOf(alamatTF.getText());
                             // if (maxCost >= desiredCost) {   
                                 // myAgent.purchase(title, desiredCost, maxCost, deadline.getTime());   
                                 myAgent.rentBook(title, maxCost, deadline,rentTime,address);   

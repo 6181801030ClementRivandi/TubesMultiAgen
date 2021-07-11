@@ -36,8 +36,8 @@ public class BookCourierAgent extends Agent {
     DFAgentDescription CourierAgentList = new DFAgentDescription();  
     CourierAgentList.setName(getAID());  
     ServiceDescription sd = new ServiceDescription();  
-    sd.setType("Book-lending");  
-    sd.setName(getLocalName()+"-Book-lending");  
+    sd.setType("Book-lending-courier");  
+    sd.setName(getLocalName()+"-Book-lending-courier");  
     CourierAgentList.addServices(sd);  
     try {  
       DFService.register(this, CourierAgentList);  

@@ -52,13 +52,19 @@ public class BookFinderAgent extends Agent{
       protected void onTick() {   
         // Update lender agen
         DFAgentDescription templateMessage = new DFAgentDescription();   
+        DFAgentDescription templateMessageCourier = new DFAgentDescription();
+        
         ServiceDescription sd = new ServiceDescription();   
         sd.setType("Book-lending");   
+        
+        ServiceDescription sdCour = new ServiceDescription();
+        sdCour.setType("Book-lending-courier");
+        
         templateMessage.addServices(sd);   
         try {   
           DFAgentDescription[] resultLenderList = DFService.search(myAgent, templateMessage);   
           lenderAgents.clear(); 
-          DFAgentDescription[] resultCourieList = DFService.search(myAgent, templateMessage);   
+          DFAgentDescription[] resultCourieList = DFService.search(myAgent, templateMessageCourier);   
           courierAgents.clear(); 
           for (int i = 0; i < resultLenderList.length; ++i) {   
             lenderAgents.addElement(resultLenderList[i].getName());   
@@ -132,16 +138,23 @@ public class BookFinderAgent extends Agent{
     }   
    
     public void action() {   
+        ACLMessage agree = new ACLMessage(ACLMessage.AGREE);
       switch (step) {   
         case 0:   
           // Send the cfp to all sellers   
           ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+          
+          //ACLMessage agree = new ACLMessage(ACLMessage.AGREE);
           //ACLMessage cfp_price_offer = new ACLMessage(ACLMessage.CFP);
           
           for (int i = 0; i < lenderAgents.size(); ++i) {   
             cfp.addReceiver((AID)lenderAgents.elementAt(i));  
             //cfp_price_offer.addReceiver((AID)lenderAgents.elementAt(i));  
-          }   
+          }
+          
+          for(int i = 0; i < courierAgents.size(); ++i){
+              agree.addReceiver((AID)courierAgents.elementAt(i));
+          }
           
           cfp.setContent(title);   
           cfp.setConversationId("book-trade");   
@@ -158,6 +171,7 @@ public class BookFinderAgent extends Agent{
           MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));   
           step = 1;   
           break;   
+   
         case 1:   
           // Receive all proposals/refusals from seller agents   
             
@@ -196,6 +210,8 @@ public class BookFinderAgent extends Agent{
             step = 3; 
             System.out.println("step: 2");
             // Send the purchase order to the seller that provided the best offer   
+            MessageTemplate mtCour =  MessageTemplate.MatchPerformative(ACLMessage.AGREE);
+            
             ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);   
             order.addReceiver(bestSeller);   
             order.setContent(title);   
@@ -209,6 +225,8 @@ public class BookFinderAgent extends Agent{
             // with address of the order 
             ACLMessage orderAddress = new ACLMessage(ACLMessage.AGREE);
             orderAddress.setContent(address);
+            //AID testAID = agree.getSender();
+            orderAddress.addReceiver((new AID("Courier", AID.ISLOCALNAME)));
             orderAddress.setConversationId("book-trade-address");
             orderAddress.setReplyWith("order"+System.currentTimeMillis());
             myAgent.send(orderAddress);
