@@ -58,14 +58,14 @@ public class BookLenderAgent extends Agent {
     private long initTime, deadline, deltaT;  
   
     private PriceManager(Agent a, String t, int ip, int mp, Date d) {  
-      super(a, 60000); // tick every minute  
+      super(a, 15000); // tick every minute  
       title = t;  
       maxPrice = ip;  
       currentPrice = maxPrice;  
       deltaP = maxPrice - mp;  
       deadline = d.getTime();  
       initTime = System.currentTimeMillis();  
-      deltaT = ((deadline - initTime) > 0 ? (deadline - initTime) : 60000);  
+      deltaT = ((deadline - initTime) > 0 ? (deadline - initTime) : 15000);  
     }  
   
     public void onStart() {  
@@ -86,6 +86,7 @@ public class BookLenderAgent extends Agent {
         // Compute the current price  
         long elapsedTime = currentTime - initTime;  
         currentPrice = (int)Math.round(maxPrice - 1.0 * deltaP * (1.0 * elapsedTime / deltaT));  
+        //currentPrice = (int)Math.floor(maxPrice * 0.9);
       }  
     }  
   
@@ -106,7 +107,12 @@ public class BookLenderAgent extends Agent {
         ACLMessage reply = msg.createReply();  
         PriceManager pm = (PriceManager) BookList.get(title);  
         if (pm != null) {  
-          // The requested book is available for sale. Reply with the price  
+          // The requested book is available for sale. Reply with the price 
+          
+          
+          //if (priceOfferFromBuyer >= priceSellerOffer){
+            // reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+          //}
           reply.setPerformative(ACLMessage.PROPOSE);  
           reply.setContent(String.valueOf(pm.getCurrentPrice()));  
         }  

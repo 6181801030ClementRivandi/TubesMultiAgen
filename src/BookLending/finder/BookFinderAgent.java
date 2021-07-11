@@ -45,7 +45,7 @@ public class BookFinderAgent extends Agent{
     myGui.setAgent(this);   
     myGui.show();   
     // Update lender agen tiap 30 detik
-    addBehaviour(new TickerBehaviour(this, 60000) {   
+    addBehaviour(new TickerBehaviour(this, 15000) {   
       protected void onTick() {   
         // Update lender agen
         DFAgentDescription templateMessage = new DFAgentDescription();   
@@ -76,7 +76,7 @@ public class BookFinderAgent extends Agent{
         private long deadline, initTime, deltaT;  
 
         private RentManager(Agent a, String t, int mp, Date d, int r, String address) {   
-          super(a, 60000); // tick every minute   
+          super(a, 15000); // tick every minute   
           title = t;   
           maxPrice = mp;   
           deadline = d.getTime();   
@@ -97,7 +97,8 @@ public class BookFinderAgent extends Agent{
           else {   
               
             long elapsedTime = currentTime - initTime;   
-            int acceptablePrice = (int)Math.round(1.0 * maxPrice * (1.0 * elapsedTime / deltaT));   
+            int acceptablePrice = (int)Math.round(1.0 * maxPrice * (1.0 * elapsedTime / deltaT));
+            //int acceptablePrice = (int)Math.ceil(maxPrice * 1.1);
             myAgent.addBehaviour(new BookNegotiator(title, acceptablePrice, this,this.address));   
           }   
         }   
@@ -144,7 +145,9 @@ public class BookFinderAgent extends Agent{
           break;   
         case 1:   
           // Receive all proposals/refusals from seller agents   
+            
           ACLMessage reply = myAgent.receive(mt);   
+          repliesCnt = repliesCnt + 1; 
           if (reply != null) {   
             // Reply received   
             if (reply.getPerformative() == ACLMessage.PROPOSE) {   
@@ -157,18 +160,25 @@ public class BookFinderAgent extends Agent{
                 bestSeller = reply.getSender();   
               }   
             }   
-            repliesCnt++;   
+            //System.out.println("repliesCn++: " + repliesCnt );
+            
+            
+              //System.out.println("repliesCn++: " + repliesCnt );
+              //System.out.println("lenderAgents.size(): " + lenderAgents.size() );
             if (repliesCnt >= lenderAgents.size()) {   
               // We received all replies   
-              step = 2;   
-            }   
-          }   
+              System.out.println("step = 2");     
+              step = 2;
+            }             
+          }    
           else {   
             block();   
-          }   
+          }
+          
           break;   
         case 2:   
-          if (bestSeller != null && bestPrice <= maxPrice) {   
+          if (bestSeller != null && bestPrice <= maxPrice) {  
+                System.out.println("step: 2");
             // Send the purchase order to the seller that provided the best offer   
             ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);   
             order.addReceiver(bestSeller);   
@@ -176,21 +186,23 @@ public class BookFinderAgent extends Agent{
             order.setConversationId("book-trade");   
             order.setReplyWith("order"+System.currentTimeMillis());   
             
-            // with address of the order
+            myAgent.send(order);  
+            myGui.notifyUser("sent Accept Proposal"); 
+            
+            // with address of the order 
             ACLMessage orderAddress = new ACLMessage(ACLMessage.CFP);
-            orderAddress.setContent(title);
+            orderAddress.setContent(address);
             orderAddress.setConversationId("book-trade-address");
-            orderAddress.setReplyWith("address" + address);
-                        
-            myAgent.send(order);   
+            orderAddress.setReplyWith("order"+System.currentTimeMillis());
             myAgent.send(orderAddress);
-            myGui.notifyUser("sent Accept Proposal");   
             myGui.notifyUser("sent Address to Courier");
+            
             // Prepare the template to get the purchase order reply   
             mt = MessageTemplate.and(   
               MessageTemplate.MatchConversationId("book-trade"),   
               MessageTemplate.MatchInReplyTo(order.getReplyWith()));   
-            step = 3;   
+            step = 3;  
+             
           }   
           else {   
             // If we received no acceptable proposals, terminate   

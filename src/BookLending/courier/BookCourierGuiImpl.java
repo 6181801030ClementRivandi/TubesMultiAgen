@@ -18,7 +18,7 @@ import java.util.Date;
 public class BookCourierGuiImpl extends JFrame implements BookCourierGui {   
     private BookCourierAgent myAgent;   
           
-    private JButton setExec;
+    
     private JTextArea logTA;    
        
     public BookCourierGuiImpl() {   
@@ -44,26 +44,6 @@ public class BookCourierGuiImpl extends JFrame implements BookCourierGui {
     p.setBorder(new BevelBorder(BevelBorder.LOWERED));   
     p.add(jsp);   
     getContentPane().add(p, BorderLayout.CENTER);   
-     
-       
-    p = new JPanel();   
-    setExec = new JButton("Execute Order");   
-        setExec.addActionListener(new ActionListener(){   
-        public void actionPerformed(ActionEvent e) {                
-            try {    
-//                myAgent.purchase(title, desiredCost, maxCost, deadline.getTime());   
-//                myAgent.purchase(title, maxCost, deadline);                                                 
-            }   
-            catch (Exception ex1) {    
-                JOptionPane.showMessageDialog(BookCourierGuiImpl.this, "Invalid information", "WARNING", JOptionPane.WARNING_MESSAGE);   
-            } 
-        }   
-        });    
-       
-    p.add(setExec);    
-       
-    p.setBorder(new BevelBorder(BevelBorder.LOWERED));   
-    getContentPane().add(p, BorderLayout.SOUTH);   
        
     pack();   
        
