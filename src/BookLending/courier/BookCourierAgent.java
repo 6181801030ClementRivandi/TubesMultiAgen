@@ -1,23 +1,11 @@
 package BookLending.courier;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- *
- * @author user
- */
 import jade.core.Agent;  
 import jade.core.behaviours.*;  
 import jade.lang.acl.ACLMessage;  
 import jade.lang.acl.MessageTemplate;  
 import jade.domain.*;  
-import jade.domain.FIPAAgentManagement.*;  
-  
-import java.util.*;  
+import jade.domain.FIPAAgentManagement.*;   
   
 public class BookCourierAgent extends Agent {  
     
@@ -45,7 +33,6 @@ public class BookCourierAgent extends Agent {
     catch (FIPAException fe) {  
       fe.printStackTrace();  
     }
-    
   }
   
   private class StartCourierJob extends CyclicBehaviour {  
@@ -63,10 +50,9 @@ public class BookCourierAgent extends Agent {
       else {  
         block();  
       }
-      
       if(msgMtp != null){
           String duration = msgMtp.getContent();
-          myGui.notifyUser("Duration: " + duration + " days");
+          myGui.notifyUser("Duration: " + duration + " day");
           myGui.notifyUser("Sending Book...");
       }
     }  

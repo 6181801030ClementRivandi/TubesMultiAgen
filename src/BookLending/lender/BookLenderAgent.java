@@ -14,21 +14,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BookLenderAgent extends Agent {  
-  // katalog buku
+  //katalog buku
   private Map BookList = new HashMap();  
   
-  // Gui 
+  //Gui 
   private BookLenderGui myGui;  
   
   protected void setup() {  
 
     System.out.println("Lender-agent "+getAID().getName()+" is ready.");  
-  
     // membuat dan menampilkan GUI  
     myGui = new BookLenderGuiImpl();  
     myGui.setAgent(this);  
-    myGui.show();  
-      
+    myGui.show();   
     // menambah behaviour
     addBehaviour(new CallForOfferServer());  
   
@@ -50,43 +48,37 @@ public class BookLenderAgent extends Agent {
     addBehaviour(new PriceManager(this, title, maxPrice, minPrice, deadline));  
   }  
   
-  
-  
   private class PriceManager extends TickerBehaviour {  
     private String title;  
     private int minPrice, currentPrice, maxPrice, deltaP;  
     private long initTime, deadline, deltaT;  
   
     private PriceManager(Agent a, String t, int ip, int mp, Date d) {  
-      super(a, 15000); // tick every minute  
+      super(a, 15000); 
       title = t;  
-      maxPrice = ip;  //max price dari param
+      maxPrice = ip;
       currentPrice = maxPrice;  
-      deltaP = maxPrice - mp;  // range harga dari maksimum dan minimum
+      deltaP = maxPrice - mp;//range harga dari maksimum dan minimum
       deadline = d.getTime();  
       initTime = System.currentTimeMillis();  
       deltaT = ((deadline - initTime) > 0 ? (deadline - initTime) : 15000);  
     }  
   
     public void onStart() {  
-      // Insert the book in the BookList of books available for sale  
       BookList.put(title, this);  
       super.onStart();  
     }  
   
     public void onTick() {  
       long currentTime = System.currentTimeMillis();  
-      if (currentTime > deadline) {  
-        // Deadline expired  
+      if (currentTime > deadline) {    
         myGui.notifyUser("Timeout book: "+title);  
         BookList.remove(title);  
         stop();  
       }  
-      else {  
-        // Compute the current price  
+      else {   
         long elapsedTime = currentTime - initTime;  
         currentPrice = (int)Math.round(maxPrice - 1.0 * deltaP * (1.0 * elapsedTime / deltaT));  
-        //currentPrice = (int)Math.floor(maxPrice * 0.9);
       }  
     }  
   
@@ -111,34 +103,25 @@ public class BookLenderAgent extends Agent {
             block();
         }
       else if (msg != null) {  
-        // CFP Message received. Process it  
         String title = msg.getContent();  
         myGui.notifyUser("Received Proposal to rent "+title);  
         ACLMessage reply = msg.createReply(); 
         
         PriceManager pm = (PriceManager) BookList.get(title);  
         if (pm != null) {  
-          // The requested book is available for sale. Reply with the price 
 
         reply.setPerformative(ACLMessage.PROPOSE);  
         reply.setContent(String.valueOf(pm.getCurrentPrice())); 
                             
         }  
-        else {  
-          // The requested book is NOT available for sale.  
+        else {    
           reply.setPerformative(ACLMessage.REFUSE);  
         }  
         myAgent.send(reply);  
         myGui.notifyUser(pm != null ? "Sent Proposal to rent at "+reply.getContent() : "Refused Proposal as the book is not for sale");  
-      }  
-      else {  
+      }else{  
         block();  
       }  
     }  
-  } // End of inner class CallForOfferServer  
-  
-  
-      
-  
-  
+  }
 }  
