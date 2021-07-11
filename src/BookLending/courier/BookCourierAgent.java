@@ -50,19 +50,25 @@ public class BookCourierAgent extends Agent {
   
   private class StartCourierJob extends CyclicBehaviour {  
     private MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.AGREE);  
+    private MessageTemplate mtp = MessageTemplate.MatchPerformative(ACLMessage.PROXY);
     
     public void action() {  
       ACLMessage msg = myAgent.receive(mt);  
+      ACLMessage msgMtp = myAgent.receive(mtp);
       
       if (msg != null) {  
          String address = msg.getContent();  
          myGui.notifyUser("Received Address "+address);
-         myGui.notifyUser("Sending Book...");
-         ACLMessage reply = msg.createReply();  
       }  
       else {  
         block();  
-      }  
+      }
+      
+      if(msgMtp != null){
+          String duration = msgMtp.getContent();
+          myGui.notifyUser("Duration: " + duration);
+          myGui.notifyUser("Sending Book...");
+      }
     }  
   }
 }

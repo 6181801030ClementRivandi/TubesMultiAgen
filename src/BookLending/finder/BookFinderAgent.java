@@ -113,7 +113,7 @@ public class BookFinderAgent extends Agent{
             long elapsedTime = currentTime - initTime;   
             int acceptablePrice = (int)Math.round(1.0 * maxPrice * (1.0 * elapsedTime / deltaT));
             //int acceptablePrice = (int)Math.ceil(maxPrice * 1.1);
-            myAgent.addBehaviour(new BookNegotiator(title, acceptablePrice, this,this.address));   
+            myAgent.addBehaviour(new BookNegotiator(title, acceptablePrice, this,this.address, rentTime));   
           }   
         }   
       }
@@ -128,13 +128,15 @@ public class BookFinderAgent extends Agent{
     private MessageTemplate mt; // The template to receive replies   
     private int step = 0;   
     private String address;
+    private int rentTime;
    
-    public BookNegotiator(String t, int p, RentManager m,String a) {   
+    public BookNegotiator(String t, int p, RentManager m,String a, int rentTime) {   
       super(null);   
       title = t;   
       maxPrice = p;   
       manager = m; 
       this.address = a;
+      this.rentTime = rentTime;
     }   
    
     public void action() {   
@@ -224,12 +226,16 @@ public class BookFinderAgent extends Agent{
             
             // with address of the order 
             ACLMessage orderAddress = new ACLMessage(ACLMessage.AGREE);
+            ACLMessage orderRentTime = new ACLMessage(ACLMessage.PROXY);
             orderAddress.setContent(address);
+            orderRentTime.setContent(String.valueOf(rentTime));
             //AID testAID = agree.getSender();
+            orderRentTime.addReceiver((new AID("Courier", AID.ISLOCALNAME)));
             orderAddress.addReceiver((new AID("Courier", AID.ISLOCALNAME)));
             orderAddress.setConversationId("book-trade-address");
             orderAddress.setReplyWith("order"+System.currentTimeMillis());
             myAgent.send(orderAddress);
+            myAgent.send(orderRentTime);
             myGui.notifyUser("sent Address to Courier");
             
             // Prepare the template to get the purchase order reply   
