@@ -20,7 +20,8 @@ import java.util.Date;
  */
 public class BookFinderAgent extends Agent{  
     // list dari lender agen 
-  private Vector lenderAgents = new Vector();   
+  private Vector lenderAgents = new Vector(); 
+  private Vector courierAgents = new Vector();
    
   // Gui 
   private BookFinderGui myGui;   
@@ -38,6 +39,8 @@ public class BookFinderAgent extends Agent{
       for (int i = 0; i < args.length; ++i) {   
         AID lender = new AID((String) args[i], AID.ISLOCALNAME);   
         lenderAgents.addElement(lender);   
+        AID courier = new AID((String) args[i], AID.ISLOCALNAME);   
+        courierAgents.addElement(courier); 
       }   
     }    
     // menampilkan GUI 
@@ -54,10 +57,15 @@ public class BookFinderAgent extends Agent{
         templateMessage.addServices(sd);   
         try {   
           DFAgentDescription[] resultLenderList = DFService.search(myAgent, templateMessage);   
-          lenderAgents.clear();   
+          lenderAgents.clear(); 
+          DFAgentDescription[] resultCourieList = DFService.search(myAgent, templateMessage);   
+          courierAgents.clear(); 
           for (int i = 0; i < resultLenderList.length; ++i) {   
             lenderAgents.addElement(resultLenderList[i].getName());   
           }   
+          for (int i = 0; i < resultCourieList.length; ++i) {   
+            courierAgents.addElement(resultCourieList[i].getName());   
+          } 
         }   
         catch (FIPAException fe) {   
           fe.printStackTrace();   
@@ -215,14 +223,11 @@ public class BookFinderAgent extends Agent{
             
             if(step == 3){
                 reply = myAgent.receive(mt);   
-                if (reply != null) {   
-                  // Purchase order reply received   
-                  if (reply.getPerformative() == ACLMessage.INFORM) {   
-                    // Purchase successful. We can terminate   
+                if (reply != null) {     
                     myGui.notifyUser("Book "+title+" successfully rented. Price = " + bestPrice);   
                     manager.stop();   
-                  }   
-                  step = 4;   
+                     
+                    step = 4;   
                 }   
                 else {   
                   block();   

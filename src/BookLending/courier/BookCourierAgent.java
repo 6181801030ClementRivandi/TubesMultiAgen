@@ -48,25 +48,22 @@ public class BookCourierAgent extends Agent {
     
   }
   
-    private class StartCourierJob extends CyclicBehaviour {  
-     private MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.AGREE),MessageTemplate.MatchConversationId("book-trade-address"));
-     
-     public void action() {  
-        //myGui.notifyUser("Courier Activated");
-       ACLMessage msg = myAgent.receive(mt);  
-       if (msg != null) {  
-         // CFP Message received. Process it  
+  private class StartCourierJob extends CyclicBehaviour {  
+    private MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.AGREE);  
+    
+    public void action() {  
+      ACLMessage msg = myAgent.receive(mt);  
+      
+      if (msg != null) {  
          String address = msg.getContent();  
          myGui.notifyUser("Received Address "+address);
          myGui.notifyUser("Sending Book...");
          ACLMessage reply = msg.createReply();  
-         
-       }  
-       else {  
-         block();
-         
-       }  
-     }  
-    }
+      }  
+      else {  
+        block();  
+      }  
+    }  
+  }
 }
   
